@@ -1,13 +1,13 @@
 <img style="width: 100%; max-width: 400px;" src="http://feathersjs.com/img/feathers-logo-wide.png" alt="Feathers logo">
 
-## An open source REST and realtime API layer for modern applications.
-
-[![Greenkeeper badge](https://badges.greenkeeper.io/feathersjs/feathers.svg)](https://greenkeeper.io/)
+## A REST and realtime API layer for modern applications.
 
 [![Build Status](https://travis-ci.org/feathersjs/feathers.png?branch=master)](https://travis-ci.org/feathersjs/feathers)
-[![Code Climate](https://codeclimate.com/github/feathersjs/feathers.png)](https://codeclimate.com/github/feathersjs/feathers)
-[![Test Coverage](https://codeclimate.com/github/feathersjs/feathers/badges/coverage.svg)](https://codeclimate.com/github/feathersjs/feathers/coverage)
 [![Dependency Status](https://img.shields.io/david/feathersjs/feathers.svg?style=flat-square)](https://david-dm.org/feathersjs/feathers)
+
+[![Greenkeeper badge](https://badges.greenkeeper.io/feathersjs/feathers.svg)](https://greenkeeper.io/)
+[![Maintainability](https://api.codeclimate.com/v1/badges/cb5ec42a2d0cc1a47a02/maintainability)](https://codeclimate.com/github/feathersjs/feathers/maintainability)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/cb5ec42a2d0cc1a47a02/test_coverage)](https://codeclimate.com/github/feathersjs/feathers/test_coverage)
 [![Download Status](https://img.shields.io/npm/dm/feathers.svg?style=flat-square)](https://www.npmjs.com/package/feathers)
 [![Slack Status](http://slack.feathersjs.com/badge.svg)](http://slack.feathersjs.com)
 
@@ -18,7 +18,7 @@ Feathers is a real-time, micro-service web framework for NodeJS that gives you c
 You can build your first real-time and REST API in just 4 commands:
 
 ```bash
-$ npm install -g feathers-cli
+$ npm install -g @feathersjs/cli
 $ mkdir my-new-app
 $ cd my-new-app/
 $ feathers generate app
@@ -33,36 +33,42 @@ Here is all the code you need to create a RESTful, real-time message API that us
 
 ```js
 // app.js
-const feathers = require('feathers');
-const rest = require('feathers-rest');
-const socketio = require('feathers-socketio');
+const feathers = require('@feathersjs/feathers');
+const express = require('@feathersjs/express')
+const socketio = require('@feathersjs/socketio');
+const handler = require('@feathersjs/errors/handler');
+
 const memory = require('feathers-memory');
-const bodyParser = require('body-parser');
-const handler = require('feathers-errors/handler');
 
-// A Feathers app is the same as an Express app
-const app = feathers();
+// Create a Feathers application that is also fully compatible
+// with an Express app
+const app = express(feathers());
 
+// Parse HTTP JSON bodies
+app.use(express.json());
+// Parse URL-encoded params
+app.use(express.urlencoded({ extended: true }));
 // Add REST API support
-app.configure(rest());
+app.configure(express.rest());
 // Configure Socket.io real-time APIs
 app.configure(socketio());
-// Parse HTTP JSON bodies
-app.use(bodyParser.json());
-// Parse URL-encoded params
-app.use(bodyParser.urlencoded({ extended: true }));
 // Register our memory "messages" service
 app.use('/messages', memory());
 // Register a nicer error handler than the default Express one
 app.use(handler());
 // Start the server
-app.listen(3000);
+app.listen(3030);
+
+// Create a new message on the server
+app.service('messages').create({
+  text: 'This is a test message'
+});
 ```
 
 Then run
 
 ```
-npm install feathers feathers-rest feathers-socketio feathers-errors feathers-memory body-parser
+npm install @feathersjs/feathers @feathersjs/express @feathersjs/socketio @feathersjs/errors feathers-memory
 node app
 ```
 
